@@ -15,8 +15,28 @@ return new class extends Migration
     {
         Schema::create('merchants', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users');
+            $table->string('name');
+            $table->string('contact_person');
+            $table->string('company_email');
+            $table->string("distributor");
+            $table->string("country");
+            $table->string("city");
+            $table->string("district");
+            $table->string("thana");
+            $table->string("father_name");
+            $table->string("mother_name");
+            $table->string("spouse_name");
+            $table->string("spouse_phone");
+            $table->date("birth_date");
+            $table->string("sms_phone");
+            $table->string("mobile");
+            $table->string("nid");
+            $table->string("passport");
+            $table->longText('present_address');
+            $table->longText('billing_address');
+            $table->longText('permanent_address');
+            $table->unsignedBigInteger('added_by');
+            $table->foreign('added_by')->references('id')->on('users');
             $table->timestamps();
         });
     }
