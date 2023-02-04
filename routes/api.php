@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\v1\admin\MerchantController;
+use App\Http\Controllers\v1\admin\PaymentServiceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -21,3 +23,17 @@ Route::post('/login',[App\Http\Controllers\v1\AuthController::class,'login']);
 Route::post('/register',[App\Http\Controllers\v1\AuthController::class,'register']);
 Route::post('/change-password',[App\Http\Controllers\v1\AuthController::class,'change_password']);
 Route::middleware('auth:sanctum')->get('/logout',[App\Http\Controllers\v1\AuthController::class,'logout']);
+
+Route::middleware(['auth:sanctum'])->prefix('merchant')->group(function () {
+    Route::post('create', [MerchantController::class, 'create']);
+    Route::get('all', [MerchantController::class, 'all']);
+    Route::delete('delete/{id}', [MerchantController::class, 'delete']);
+});
+
+Route::middleware(['auth:sanctum'])->prefix('payment-service')->group(function () {
+    Route::post('merchant/bkash/create', [PaymentServiceController::class, 'createBkashMerchant']);
+    Route::post('merchant/shurjo/create', [PaymentServiceController::class, 'createShurjoPayMerchant']);
+    Route::get('merchant/all', [PaymentServiceController::class, 'getAllMerchant']);
+    Route::get('all', [PaymentServiceController::class, 'getPaymentServices']);
+    Route::delete('merchant/delete/{type}/{id}', [PaymentServiceController::class, 'deleteMerchant']);
+});
