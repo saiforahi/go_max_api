@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->get('/logout',[App\Http\Controllers\v1\AuthCo
 
 Route::middleware(['auth:sanctum'])->prefix('merchant')->group(function () {
     Route::post('create', [MerchantController::class, 'create']);
+    Route::post('edit/{merchant_id}', [MerchantController::class, 'edit']);
     Route::get('all', [MerchantController::class, 'all']);
     Route::delete('delete/{id}', [MerchantController::class, 'delete']);
 });

@@ -48,6 +48,42 @@ class MerchantController extends Controller
         }
     }
 
+    public function edit(MerchantRequest $req,$merchant_id){
+        DB::beginTransaction();
+        try{
+            $merchant=Merchant::where("id",$merchant_id)->first();
+            $merchant->update(array_merge($req->except('main_image'),['added_by'=>$req->user()->id]));
+            $images=array();
+            if($req->has('main_image')){
+                array_push($images,$req->file('main_image'));
+                $mediaItems = $merchant->getMedia("main_image");
+                foreach($mediaItems as $item){
+                    $item->delete();
+                }
+            }
+            event(new UploadImageEvent($merchant,$images));
+            if($merchant){
+                DB::commit();
+                return response()->json([
+                    "success"=>true,
+                    "message"=>"Merchant info has been updated!",
+                    "data"=>$merchant
+                ],200);
+            }
+            else{
+                throw new Exception("Merchant update failed");
+            }
+        }
+        catch (Exception $e){
+            DB::rollBack();
+            return response()->json([
+                "success"=>false,
+                "message"=>$e->getMessage(),
+                "line"=>$e->getLine()
+            ],500);
+        }
+    }
+
     public function all(Request $req){
         try{
             $merchants=Merchant::all();
