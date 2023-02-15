@@ -17,7 +17,10 @@ class Merchant extends Model implements HasMedia
 
     protected function getMainImageAttribute()
     {
-        return $this->getMedia('main_image')[0]->getFullUrl();
+        if(count($this->getMedia("main_image"))>0){
+            return $this->getMedia('main_image')[0]->getFullUrl();
+        }
+        return "";
     }
 
     public function registerMediaConversions(Media $media = null): void

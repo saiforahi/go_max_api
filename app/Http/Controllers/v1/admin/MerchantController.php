@@ -111,7 +111,10 @@ class MerchantController extends Controller
     public function delete($id){
         try{
             $merchant=Merchant::findOrFail($id);
-            $merchant->clearMediaCollection('main_image');
+            $mediaItems = $merchant->getMedia("main_image");
+            foreach($mediaItems as $item){
+                $item->delete();
+            }
             $merchant->delete();
             return response()->json([
                 "success"=>true,
