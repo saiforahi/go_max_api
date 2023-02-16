@@ -16,6 +16,9 @@ return new class extends Migration
         Schema::create('merchant_apps', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('merchant_id');
+            $table->string("name");
+            $table->string('payment_merchant_id');
+            $table->string('payment_merchant_type');
             $table->foreign('merchant_id')->references('id')->on('merchants');
             $table->timestamps();
         });

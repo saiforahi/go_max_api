@@ -4,34 +4,35 @@ namespace App\Http\Controllers\v1\admin;
 
 use App\Events\UploadImageEvent;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\v1\MerchantRequest;
-use App\Models\Merchant;
+use App\Models\MerchantApp;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class MerchantController extends Controller
+class MerchantAppController extends Controller
 {
     //
     public function __construct() {
         $this->middleware('auth:sanctum', ['except' => []]);
     }
 
-    public function create(MerchantRequest $req){
+    public function create(Request $req){
         DB::beginTransaction();
         try{
-            $new_merchant = Merchant::create(array_merge($req->except('main_image'),['added_by'=>$req->user()->id]));
-            $images=array();
-            if($req->has('main_image')){
-                array_push($images,$req->file('main_image'));
-            }
-            event(new UploadImageEvent($new_merchant,$images));
-            if($new_merchant){
+            $req->validate([
+                "name"=>"required|string|max:255",
+                "merchant_id"=>"required|exists:merchants,id",
+                "payment_merchant_id"=>"required|string",
+                "payment_merchant_type"=>"required|string"
+            ]);
+            $new_merchant_app = MerchantApp::create($req->all());
+            
+            if($new_merchant_app){
                 DB::commit();
                 return response()->json([
                     "success"=>true,
-                    "message"=>"New Merchant has been added!",
-                    "data"=>$new_merchant
+                    "message"=>"New Merchant App has been added!",
+                    "data"=>$new_merchant_app
                 ],200);
             }
             else{
@@ -47,31 +48,27 @@ class MerchantController extends Controller
             ],500);
         }
     }
-
-    public function edit(MerchantRequest $req,$merchant_id){
+    public function edit(Request $req,$id){
         DB::beginTransaction();
         try{
-            $merchant=Merchant::where("id",$merchant_id)->first();
-            $merchant->update(array_merge($req->except('main_image'),['added_by'=>$req->user()->id]));
-            $images=array();
-            if($req->has('main_image')){
-                array_push($images,$req->file('main_image'));
-                $mediaItems = $merchant->getMedia("main_image");
-                foreach($mediaItems as $item){
-                    $item->delete();
-                }
-            }
-            event(new UploadImageEvent($merchant,$images));
-            if($merchant){
+            $req->validate([
+                "name"=>"required|string|max:255",
+                "merchant_id"=>"required|exists:merchants,id",
+                "payment_merchant_id"=>"required|string",
+                "payment_merchant_type"=>"required|string"
+            ]);
+            $existing_merchant_app = MerchantApp::findOrFail($id)->update($req->all());
+            
+            if($existing_merchant_app){
                 DB::commit();
                 return response()->json([
                     "success"=>true,
-                    "message"=>"Merchant info has been updated!",
-                    "data"=>$merchant
+                    "message"=>"Merchant App has been updated!",
+                    "data"=>$existing_merchant_app
                 ],200);
             }
             else{
-                throw new Exception("Merchant update failed");
+                throw new Exception("Merchant app update failed");
             }
         }
         catch (Exception $e){
@@ -83,10 +80,9 @@ class MerchantController extends Controller
             ],500);
         }
     }
-
     public function all(Request $req){
         try{
-            $merchants=Merchant::with(['applications'])->get();
+            $merchant_apps=MerchantApp::with(['merchant'])->get();
             // $merchants = $merchants->transform(function ($item, $key) { 
             //     foreach ($item->getMedia('main_image') as $media) { 
             //         $media['link'] = $media->getFullUrl(); 
@@ -95,8 +91,8 @@ class MerchantController extends Controller
             // });
             return response()->json([
                 "success"=>true,
-                "message"=>"Merchant List",
-                "data"=>$merchants
+                "message"=>"New Merchant has been added!",
+                "data"=>$merchant_apps
             ],200);
         }
         catch (Exception $e){
@@ -110,15 +106,11 @@ class MerchantController extends Controller
 
     public function delete($id){
         try{
-            $merchant=Merchant::findOrFail($id);
-            $mediaItems = $merchant->getMedia("main_image");
-            foreach($mediaItems as $item){
-                $item->delete();
-            }
-            $merchant->delete();
+            $merchant_app=MerchantApp::findOrFail($id);
+            $merchant_app->delete();
             return response()->json([
                 "success"=>true,
-                "message"=>"Merchant has been deleted!",
+                "message"=>"Merchant Application has been deleted!",
             ],200);
         }
         catch (Exception $e){

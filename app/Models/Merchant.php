@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Merchant extends Model implements HasMedia
 {
@@ -26,5 +25,9 @@ class Merchant extends Model implements HasMedia
     public function registerMediaConversions(Media $media = null): void
     {
         $this->addMediaConversion('thumbnail')->width(368)->height(232)->sharpen(10);
+    }
+
+    public function applications(){
+        return $this->hasMany(MerchantApp::class);
     }
 }

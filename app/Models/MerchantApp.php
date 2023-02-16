@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class MerchantApp extends Model
 {
     use HasFactory;
+    protected $guarded=[];
+
+    public function merchant(){
+        return $this->belongsTo(Merchant::class);
+    }
 }

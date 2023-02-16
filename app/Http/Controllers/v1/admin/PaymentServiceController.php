@@ -87,6 +87,34 @@ class PaymentServiceController extends Controller
             ],500);
         }
     }
+    public function editShurjoPayMerchant(Request $req,$id){
+        DB::beginTransaction();
+        try{
+            $req->validate([
+                'live_api_username'=>'required|string|max:255|min:3',
+                'live_api_password'=>'required|string|max:255|min:3',
+                'live_prefix'=>'required|string|max:20|min:2',
+                'alias_name'=>'required|string|max:255'
+            ]);
+            $existing_shurjo_merchant=ShurjoPayMerchant::findOrFail($id)->update($req->all());
+            if($existing_shurjo_merchant){
+                DB::commit();
+                return response()->json([
+                    "success"=>true,
+                    "message"=>"ShurjoPay Merchant updated!",
+                    "data"=>$existing_shurjo_merchant
+                ],200);
+            }
+        }
+        catch(Exception $e){
+            DB::rollBack();
+            return response()->json([
+                "success"=>false,
+                "message"=>$e->getMessage(),
+                "line"=>$e->getLine()
+            ],500);
+        }
+    }
     public function createBkashMerchant(Request $req){
         DB::beginTransaction();
         try{
@@ -120,6 +148,39 @@ class PaymentServiceController extends Controller
             ],500);
         }
     }
+    public function editBkashMerchant(Request $req,$id){
+        DB::beginTransaction();
+        try{
+            $req->validate([
+                'reference_merchant_id'=>'required|string|max:255|min:3',
+                'merchant_mcc'=>'required|string|max:255|min:3',
+                'merchant_name'=>'required|string|max:20|min:2',
+                'merchant_city'=>'required|string|max:255',
+                'merchant_region'=>'required|string|max:255|min:3',
+                'merchant_store_reference_id'=>'required|string|max:255|min:3',
+                'merchant_store_mcc'=>'required|string|max:20|min:2',
+                'merchant_store_name'=>'required|string|max:255',
+                'alias_name'=>'required|string|max:255'
+            ]);
+            $existing_bkash_merchant=BkashMerchant::findOrFail($id)->update($req->all());
+            if($existing_bkash_merchant){
+                DB::commit();
+                return response()->json([
+                    "success"=>true,
+                    "message"=>"bKash Merchant updated!",
+                    "data"=>$existing_bkash_merchant
+                ],200);
+            }
+        }
+        catch(Exception $e){
+            DB::rollBack();
+            return response()->json([
+                "success"=>false,
+                "message"=>$e->getMessage(),
+                "line"=>$e->getLine()
+            ],500);
+        }
+    }
     public function getAllMerchant(Request $req){
         try{
             $result=[];
@@ -137,7 +198,17 @@ class PaymentServiceController extends Controller
                         'id'=>$item->id,
                         'type'=>PaymentService::find(2),
                         'alias_name'=>$item->alias_name,
-                        'config'=>array("merchant_mcc"=>$item->merchant_mcc,"merchant_city"=>$item->merchant_city,"merchant_store_name"=>$item->merchant_store_name)
+                        'config'=>array(
+                            "merchant_mcc"=>$item->merchant_mcc,
+                            "merchant_city"=>$item->merchant_city,
+                            "merchant_name"=>$item->merchant_name,
+                            "merchant_store_name"=>$item->merchant_store_name,
+                            "reference_merchant_id"=>$item->reference_merchant_id,
+                            "merchant_region"=>$item->merchant_region,
+                            "merchant_store_reference_id"=>$item->merchant_store_reference_id,
+                            "merchant_store_mcc"=>$item->merchant_store_mcc,
+                            "merchant_store_name"=>$item->merchant_store_name
+                        )
                     )
                 );
             }

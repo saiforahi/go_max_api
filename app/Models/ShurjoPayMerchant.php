@@ -9,4 +9,9 @@ class ShurjoPayMerchant extends Model
 {
     use HasFactory;
     protected $guarded=[];
+
+    public function extendable()
+    {
+        return $this->morphTo();
+    }
 }
